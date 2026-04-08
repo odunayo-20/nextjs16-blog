@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
 
       },
        {
-    // hostname: 'insightful-dachshund-91.convex.cloud',
-    hostname: 'grandiose-meadowlark-349.convex.cloud',
+    // hostname: 'insightful-dachshund-91.convex.cloud', // for development
+    hostname: 'grandiose-meadowlark-349.convex.cloud', // for production
     protocol: 'https',
     port: "",
     pathname: '/api/storage/**',

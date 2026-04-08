@@ -4,6 +4,7 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { Separator } from "@/components/ui/separator";
 import CommentSection from "@/components/web/CommentSection";
 import { PostPresence } from "@/components/web/PostPresence";
+import { SharePost } from "@/components/web/SharedPost";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { getToken } from "@/lib/auth-server";
@@ -67,12 +68,24 @@ await preloadQuery(api.comments.getCommentsByPostId, {
         );
 
     }
+
+    // Construct the URL (In production, replace with your actual domain)
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextjs16-blog-azure.vercel.app";
+    const postUrl = `${baseUrl}/blog/${post._id}`;
     return (
         <div className='max-w-3xl mx-auto py-8 px-4 animate-in fade-in duration-500 relative'>
-            <Link className={buttonVariants({ variant: "ghost", className: "mb-4" })} href="/blog">
+            {/* <Link className={buttonVariants({ variant: "ghost", className: "mb-4" })} href="/blog">
                 <ArrowLeft className="size-4" />
                  Back to Blog
-            </Link>
+            </Link> */}
+
+            <div className="flex justify-between items-start mb-4">
+                 <Link className={buttonVariants({ variant: "ghost" })} href="/blog">
+                    <ArrowLeft className="size-4" /> Back to Blog
+                </Link>
+                {/* Add Share Button here */}
+                <SharePost title={post.title} url={postUrl} />
+            </div>
 
 
             <div className="relative w-full h-[400px] mb-8 rounded-xl overflow-hidden shadow-sm">
