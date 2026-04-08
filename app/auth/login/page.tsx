@@ -38,6 +38,7 @@ const Login = () => {
       fetchOptions: {
         onSuccess: () => {
           toast.success("Logged in successfully");
+          router.refresh();
           router.push("/");
         },
         onError: (error) => {toast.error(error.error.message);

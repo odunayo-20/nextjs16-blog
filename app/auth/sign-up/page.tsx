@@ -40,6 +40,7 @@ const SignUp = () => {
       fetchOptions: {
         onSuccess: () => {
           toast.success("Account created successfully");
+          router.refresh();
           router.push("/");
         },
         onError: (error) => {toast.error(error.error.message);

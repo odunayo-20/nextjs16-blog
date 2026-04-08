@@ -74,10 +74,7 @@ await preloadQuery(api.comments.getCommentsByPostId, {
     const postUrl = `${baseUrl}/blog/${post._id}`;
     return (
         <div className='max-w-3xl mx-auto py-8 px-4 animate-in fade-in duration-500 relative'>
-            {/* <Link className={buttonVariants({ variant: "ghost", className: "mb-4" })} href="/blog">
-                <ArrowLeft className="size-4" />
-                 Back to Blog
-            </Link> */}
+          
 
             <div className="flex justify-between items-start mb-4">
                  <Link className={buttonVariants({ variant: "ghost" })} href="/blog">
