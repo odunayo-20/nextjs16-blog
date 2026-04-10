@@ -51,69 +51,69 @@ interface PostIdRouteProps {
 
 
 export async function generateMetadata({ params }: PostIdRouteProps): Promise<Metadata> {
-  const { postId } = await params;
+    const { postId } = await params;
 
-  const post = await fetchQuery(api.posts.getPostById, { postId });
+    const post = await fetchQuery(api.posts.getPostById, { postId });
 
-  if (!post) {
+    if (!post) {
+        return {
+            title: "Post not found",
+            description: "This post does not exist",
+        };
+    }
+
+    const baseUrl =
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        "https://nextjs16-blog-azure.vercel.app";
+
+    const url = `${baseUrl}/blog/${postId}`;
+
     return {
-      title: "Post not found",
-      description: "This post does not exist",
-    };
-  }
+        title: post.title,
+        description: post.body.substring(0, 160),
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://nextjs16-blog-azure.vercel.app";
-
-  const url = `${baseUrl}/blog/${postId}`;
-
-  return {
-    title: post.title,
-    description: post.body.substring(0, 160),
-
-    openGraph: {
-      title: post.title,
-      description: post.body.substring(0, 160),
-      url: url,
-      siteName: "Blog Pro",
-      type: "article",
-      images: [
-        {
-          url: post.imageUrl || `${baseUrl}/default-og.png`, // VERY IMPORTANT
-          width: 1200,
-          height: 630,
-          alt: post.title,
+        openGraph: {
+            title: post.title,
+            description: post.body.substring(0, 160),
+            url: url,
+            siteName: "Blog Pro",
+            type: "article",
+            images: [
+                {
+                    url: post.imageUrl || `${baseUrl}/default-og.png`, // VERY IMPORTANT
+                    width: 1200,
+                    height: 630,
+                    alt: post.title,
+                },
+            ],
         },
-      ],
-    },
 
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.body.substring(0, 160),
-      images: [post.imageUrl || `${baseUrl}/default-og.png`],
-    },
-  };
+        twitter: {
+            card: "summary_large_image",
+            title: post.title,
+            description: post.body.substring(0, 160),
+            images: [post.imageUrl || `${baseUrl}/default-og.png`],
+        },
+    };
 }
 
-export default async function PostIdRoute({ params} : PostIdRouteProps){
+export default async function PostIdRoute({ params }: PostIdRouteProps) {
 
-    const { postId } = await params; 
+    const { postId } = await params;
 
     const token = await getToken();
 
     const [post, preloadedComments, userId] = await Promise.all([
         await fetchQuery(api.posts.getPostById, { postId }),
-await preloadQuery(api.comments.getCommentsByPostId, {
-        postId: postId,
-    }),
-    await fetchQuery(api.presence.getUserId, {}, {token}),
+        await preloadQuery(api.comments.getCommentsByPostId, {
+            postId: postId,
+        }),
+        await fetchQuery(api.presence.getUserId, {}, { token }),
 
     ]);
 
-   
-    if(!post){
+
+    if (!post) {
         return (
             <div>
                 <h1 className="text-6xl font-extrabold text-red-500 py-20">No Post Found</h1>
@@ -131,58 +131,64 @@ await preloadQuery(api.comments.getCommentsByPostId, {
     const postUrl = `${baseUrl}/blog/${post._id}`;
     return (
         <div className='max-w-3xl mx-auto py-8 px-4 animate-in fade-in duration-500 relative'>
-          
 
-       <div className="flex justify-between items-start mb-4">
-    <Link className={buttonVariants({ variant: "ghost" })} href="/blog">
-        <ArrowLeft className="size-4" /> Back to Blog
-    </Link>
+<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
     
-    <div className="flex items-center gap-2">
+    {/* Back Button */}
+    <Link 
+        className={buttonVariants({ variant: "ghost" })} 
+        href="/blog"
+    >
+        <ArrowLeft className="size-4" /> 
+        <span className="ml-1">Back to Blog</span>
+    </Link>
+
+    {/* Actions */}
+    <div className="flex flex-wrap items-center gap-2">
         {isAuthor && (
             <>
-                <Link 
-                    href={`/blog/${post._id}/edit`} 
+                <Link
+                    href={`/blog/${post._id}/edit`}
                     className={buttonVariants({ variant: "outline", size: "sm" })}
                 >
                     Edit
                 </Link>
-                {/* We'll create this DeletePost component below */}
-                <DeletePost postId={post._id} /> 
+
+                <DeletePost postId={post._id} />
             </>
         )}
+
         <SharePost title={post.title} url={postUrl} />
     </div>
 </div>
 
-
             <div className="relative w-full h-[400px] mb-8 rounded-xl overflow-hidden shadow-sm">
-                <Image src={post.imageUrl ?? "https://plus.unsplash.com/premium_photo-1731917385487-0c38e0530fbf?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"} alt={post.title} fill className="object-cover hover:scale-105 transition-transform duration-500 object-top"/>
+                <Image src={post.imageUrl ?? "https://plus.unsplash.com/premium_photo-1731917385487-0c38e0530fbf?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"} alt={post.title} fill className="object-cover hover:scale-105 transition-transform duration-500 object-top" />
             </div>
 
             <div className="space-y-4 flex flex-col">
                 <h1 className="text-4xl font-bold tracking-tight text-foreground">{post.title}</h1>
 
-<div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
 
-                <p className="text-lg text-muted-foreground">Posted on:{" "} {new Date(post._creationTime).toLocaleDateString("en-US")}</p>
+                    <p className="text-lg text-muted-foreground">Posted on:{" "} {new Date(post._creationTime).toLocaleDateString("en-US")}</p>
 
-{
-    userId && 
+                    {
+                        userId &&
 
-                <PostPresence roomId={post._id} userId={userId} />
-}
-                
-</div>
+                        <PostPresence roomId={post._id} userId={userId} />
+                    }
+
+                </div>
             </div>
 
             <Separator className="my-8" />
 
             <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">{post.body}</p>
 
-             <Separator className="my-8" />
+            <Separator className="my-8" />
 
-             <CommentSection preloadedComments={preloadedComments}/>
+            <CommentSection preloadedComments={preloadedComments} />
         </div>
     );
 }
