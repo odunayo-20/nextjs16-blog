@@ -125,11 +125,11 @@ const EditRoute = ({ initialData }: EditRouteProps) => {
                     postId: initialData._id,
                     imageStorageId: imageStorageId, // The new ID
                     // Pass the old ID so the Server Action knows what to delete
-                    oldImageStorageId: imageStorageId ? initialData.imageStorageId : undefined
+                    // oldImageStorageId: imageStorageId ? initialData.imageStorageId : undefined
                 });
 
                 if (result && 'error' in result) {
-                    toast.error(result.error);
+                    // toast.error(result.error);
                     return;
                 }
 
