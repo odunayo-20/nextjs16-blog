@@ -35,7 +35,7 @@ const Navbar = () => {
             <div className='flex items-center gap-8'>
                 <Link href="/">
                     <h1 className='text-2xl md:text-3xl font-bold'>
-                        Next<span className='text-primary'>Pro</span>
+                        Blog<span className='text-primary'>Pro</span>
                     </h1>
                 </Link>
 

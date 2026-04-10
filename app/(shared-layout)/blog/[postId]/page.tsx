@@ -3,10 +3,12 @@
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Separator } from "@/components/ui/separator";
 import CommentSection from "@/components/web/CommentSection";
+import { DeletePost } from "@/components/web/DeletePost";
 import { PostPresence } from "@/components/web/PostPresence";
 import { SharePost } from "@/components/web/SharedPost";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { getPostById, getPosts } from "@/convex/posts";
 import { getToken } from "@/lib/auth-server";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import { get } from "http";
@@ -24,24 +26,75 @@ interface PostIdRouteProps {
     }>
 }
 
-export async function generateMetaData({
-    params,
-}: PostIdRouteProps) : Promise<Metadata>{
-    const { postId } = await params;
+// export async function generateMetaData({
+//     params,
+// }: PostIdRouteProps) : Promise<Metadata>{
+//     const { postId } = await params;
 
-    const post = await fetchQuery(api.posts.getPostById, { postId: postId});
+//     const post = await fetchQuery(api.posts.getPostById, { postId: postId});
 
-    if(!post){
-        return {
-            title: "Post not found"
-        }
-    }
+//     if(!post){
+//         return {
+//             title: "Post not found"
+//         }
+//     }
 
 
+//     return {
+//         title: post.title,
+//         description: post.body
+//     }
+// }
+
+
+// app/blog/[postId]/page.tsx
+
+
+export async function generateMetadata({ params }: PostIdRouteProps): Promise<Metadata> {
+  const { postId } = await params;
+
+  const post = await fetchQuery(api.posts.getPostById, { postId });
+
+  if (!post) {
     return {
-        title: post.title,
-        description: post.body
-    }
+      title: "Post not found",
+      description: "This post does not exist",
+    };
+  }
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://nextjs16-blog-azure.vercel.app";
+
+  const url = `${baseUrl}/blog/${postId}`;
+
+  return {
+    title: post.title,
+    description: post.body.substring(0, 160),
+
+    openGraph: {
+      title: post.title,
+      description: post.body.substring(0, 160),
+      url: url,
+      siteName: "Blog Pro",
+      type: "article",
+      images: [
+        {
+          url: post.imageUrl || `${baseUrl}/default-og.png`, // VERY IMPORTANT
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.body.substring(0, 160),
+      images: [post.imageUrl || `${baseUrl}/default-og.png`],
+    },
+  };
 }
 
 export default async function PostIdRoute({ params} : PostIdRouteProps){
@@ -69,6 +122,10 @@ await preloadQuery(api.comments.getCommentsByPostId, {
 
     }
 
+
+    // Check if current user is the author
+    const isAuthor = userId === post.authorId;
+
     // Construct the URL (In production, replace with your actual domain)
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextjs16-blog-azure.vercel.app";
     const postUrl = `${baseUrl}/blog/${post._id}`;
@@ -76,13 +133,27 @@ await preloadQuery(api.comments.getCommentsByPostId, {
         <div className='max-w-3xl mx-auto py-8 px-4 animate-in fade-in duration-500 relative'>
           
 
-            <div className="flex justify-between items-start mb-4">
-                 <Link className={buttonVariants({ variant: "ghost" })} href="/blog">
-                    <ArrowLeft className="size-4" /> Back to Blog
+       <div className="flex justify-between items-start mb-4">
+    <Link className={buttonVariants({ variant: "ghost" })} href="/blog">
+        <ArrowLeft className="size-4" /> Back to Blog
+    </Link>
+    
+    <div className="flex items-center gap-2">
+        {isAuthor && (
+            <>
+                <Link 
+                    href={`/blog/${post._id}/edit`} 
+                    className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                    Edit
                 </Link>
-                {/* Add Share Button here */}
-                <SharePost title={post.title} url={postUrl} />
-            </div>
+                {/* We'll create this DeletePost component below */}
+                <DeletePost postId={post._id} /> 
+            </>
+        )}
+        <SharePost title={post.title} url={postUrl} />
+    </div>
+</div>
 
 
             <div className="relative w-full h-[400px] mb-8 rounded-xl overflow-hidden shadow-sm">
