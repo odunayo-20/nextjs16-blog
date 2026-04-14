@@ -68,6 +68,14 @@ export async function generateMetadata({ params }: PostIdRouteProps): Promise<Me
 
     const url = `${baseUrl}/blog/${postId}`;
 
+    const formattedDate = new Date(post._creationTime).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    });
+
+    const ogImageUrl = post.imageUrl || `${baseUrl}/api/og?title=${encodeURIComponent(post.title)}&date=${encodeURIComponent(formattedDate)}`;
+
     return {
         title: post.title,
         description: post.body.substring(0, 160),
@@ -80,7 +88,7 @@ export async function generateMetadata({ params }: PostIdRouteProps): Promise<Me
             type: "article",
             images: [
                 {
-                    url: post.imageUrl || `${baseUrl}/default-og.png`, // VERY IMPORTANT
+                    url: ogImageUrl,
                     width: 1200,
                     height: 630,
                     alt: post.title,
@@ -92,7 +100,7 @@ export async function generateMetadata({ params }: PostIdRouteProps): Promise<Me
             card: "summary_large_image",
             title: post.title,
             description: post.body.substring(0, 160),
-            images: [post.imageUrl || `${baseUrl}/default-og.png`],
+            images: [ogImageUrl],
         },
     };
 }
